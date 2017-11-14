@@ -1,0 +1,4 @@
+
+ps -ef|grep mosquitto
+/usr/local/sbin/mosquitto -c /usr/local/etc/mosquitto/mosquitto.conf
+/usr/local/bin/mosquitto_passwd -c /usr/local/etc/mosquitto/pwfile.example

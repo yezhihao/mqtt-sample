@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:file:~/.h2/mqtt;Auto_Server=True;IgnoreCase=True
+    username: root
+    password: abc@123
+    test-on-borrow: true
+    validation-query: select 1
+
+  jpa:
+    database: h2
+    show-sql: false
+    hibernate:
+      ddl-auto: create
+
+server:
+  port: 8088
+  tomcat:
+    accesslog:
+      enabled: true
+      directory: /var/log/accesslog/
+
+mqtt:
+  server-uris: tcp://127.0.0.1:3923
+  username: admin
+  password: abc@123
+  keep-alive-interval: 60
+  sub-topics: /MC/out/#, MC/out/#
