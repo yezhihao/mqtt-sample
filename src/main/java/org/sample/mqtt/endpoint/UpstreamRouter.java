@@ -17,7 +17,7 @@ public class UpstreamRouter {
 
     @Router(inputChannel = "mqttInboundChannel")
     public String redirect(@Header(MqttHeaders.TOPIC) String topic, @Payload String payload) {
-        if (topic.endsWith("ack") || payload.endsWith("nak"))
+        if (topic.endsWith("ack") || topic.endsWith("nak"))
             return ResponseChannel;
         return NoticeChannel;
     }
