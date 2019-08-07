@@ -6,11 +6,13 @@ import org.springframework.messaging.Message;
 /**
  * Created by Alan on 2017/2/22.
  */
-public interface ResponseMessageService {
+public interface MessageService {
 
-    RendezvousChannel subscribeTopic(String topic);
+    String send(String deviceId, String action, String payload);
 
-    void unSubscribeTopic(String topic);
+    RendezvousChannel subscribeTopic(String deviceId, String action);
+
+    void unSubscribeTopic(String deviceId, String action);
 
     void response(Message<?> message);
 

@@ -1,7 +1,6 @@
-package org.sample.mqtt.mqtt;
+package org.sample.mqtt.endpoint;
 
-import org.sample.mqtt.config.UpstreamRouter;
-import org.sample.mqtt.service.ResponseMessageService;
+import org.sample.mqtt.service.MessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ public class ResponseHandler implements MessageHandler {
     private static final Logger logger = LoggerFactory.getLogger(ResponseHandler.class.getSimpleName());
 
     @Autowired
-    private ResponseMessageService messageService;
+    private MessageService messageService;
 
     @ServiceActivator(inputChannel = UpstreamRouter.ResponseChannel, poller = @Poller(fixedDelay = "300", maxMessagesPerPoll = "1"))
     @Override
@@ -30,8 +29,7 @@ public class ResponseHandler implements MessageHandler {
         String topic = message.getHeaders().get(MqttHeaders.TOPIC, String.class);
         String content = String.valueOf(message.getPayload());
 
-        logger.info("Topic {} : {}", topic, content);
+        logger.info("{} : {}", topic, content);
         messageService.response(message);
     }
-
 }

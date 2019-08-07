@@ -1,11 +1,14 @@
 package org.sample.mqtt.config;
 
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.channel.QueueChannel;
+import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
@@ -16,8 +19,9 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
 @Configuration
+@EnableIntegration
 @IntegrationComponentScan(basePackages = "org.sample.mqtt")
-public class MQTTConfiguration {
+public class MqttConfig {
 
     @Value("${mqtt.server-uris}")
     private String[] serverURIs;
@@ -26,7 +30,7 @@ public class MQTTConfiguration {
     private String username;
 
     @Value("${mqtt.password}")
-    private String password;
+    private char[] password;
 
     @Value("${mqtt.keep-alive-interval}")
     private int keepAliveInterval;
@@ -37,20 +41,32 @@ public class MQTTConfiguration {
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
-        factory.setServerURIs(serverURIs);
-        factory.setUserName(username);
-        factory.setPassword(password);
-        factory.setKeepAliveInterval(keepAliveInterval);
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setServerURIs(serverURIs);
+        options.setUserName(username);
+        options.setPassword(password);
+        options.setKeepAliveInterval(keepAliveInterval);
+        factory.setConnectionOptions(options);
         return factory;
     }
 
     @Bean
     @ServiceActivator(inputChannel = "mqttOutboundChannel")
     public MessageHandler mqttOutbound() {
-        MqttPahoMessageHandler messageHandler =
-                new MqttPahoMessageHandler("NYBackendPublisher", mqttClientFactory());
+        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler("1backendPublisher", mqttClientFactory());
+        messageHandler.setCompletionTimeout(5000);
         messageHandler.setAsync(true);
         return messageHandler;
+    }
+
+    @Bean
+    public MessageProducer mqttInbound() {
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("1backendSubscriber", mqttClientFactory(), subTopics);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setOutputChannel(mqttInboundChannel());
+        adapter.setCompletionTimeout(5000);
+        adapter.setQos(1);
+        return adapter;
     }
 
     @Bean
@@ -59,20 +75,17 @@ public class MQTTConfiguration {
     }
 
     @Bean
-    public MessageProducer mqttInbound() {
-        MqttPahoMessageDrivenChannelAdapter adapter =
-                new MqttPahoMessageDrivenChannelAdapter("NYBackendSubscriber", mqttClientFactory(),
-                        subTopics);
-        adapter.setCompletionTimeout(5000);
-        adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
-        adapter.setOutputChannel(mqttInboundChannel());
-        return adapter;
-    }
-
-    @Bean
     public MessageChannel mqttInboundChannel() {
         return new DirectChannel();
     }
 
+    @Bean
+    public MessageChannel noticeChannel() {
+        return new QueueChannel(50);
+    }
+
+    @Bean
+    public MessageChannel responseChannel() {
+        return new QueueChannel(50);
+    }
 }

@@ -1,11 +1,13 @@
-package org.sample.mqtt.config;
+package org.sample.mqtt.endpoint;
 
 import org.springframework.integration.annotation.Router;
+import org.springframework.integration.mqtt.support.MqttHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by ICQ on 16/5/23.
+ * Created by Alan.ye on 18/5/23.
  */
 @Component
 public class UpstreamRouter {
@@ -14,11 +16,9 @@ public class UpstreamRouter {
     public static final String NoticeChannel = "noticeChannel";
 
     @Router(inputChannel = "mqttInboundChannel")
-    public String redirect(@Payload String payload) {
-        if (payload.contains("ACK") || payload.contains("NAK")) {
+    public String redirect(@Header(MqttHeaders.TOPIC) String topic, @Payload String payload) {
+        if (topic.endsWith("ack") || payload.endsWith("nak"))
             return ResponseChannel;
-        } else {
-            return NoticeChannel;
-        }
+        return NoticeChannel;
     }
 }

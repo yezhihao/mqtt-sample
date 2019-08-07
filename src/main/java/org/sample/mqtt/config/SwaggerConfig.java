@@ -15,12 +15,12 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @Configuration
 @EnableSwagger2
-public class SwaggerDocumentationConfig {
+public class SwaggerConfig {
 
     ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("MC-Server")
-                .description("MQTT API")
+                .title("mqtt-server")
+                .description("mqtt api")
                 .license("")
                 .licenseUrl("")
                 .termsOfServiceUrl("")
