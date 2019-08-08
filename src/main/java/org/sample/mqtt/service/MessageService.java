@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by ICQ on 16/5/24.
+ * Created by Alan on 2017/5/24.
  */
 @Service
 public class MessageService {
@@ -48,23 +48,21 @@ public class MessageService {
     }
 
     public RendezvousChannel subscribeTopic(String deviceId, String action) {
-        String topic = getKey(deviceId, action);
+        String key = getKey(deviceId, action);
         RendezvousChannel result = null;
-        if (!topicSubscribers.containsKey(topic))
-            topicSubscribers.put(topic, result = new RendezvousChannel());
+        if (!topicSubscribers.containsKey(key))
+            topicSubscribers.put(key, result = new RendezvousChannel());
         return result;
     }
 
     public void unSubscribeTopic(String deviceId, String action) {
-        String topic = getKey(deviceId, action);
-        topicSubscribers.remove(topic);
+        topicSubscribers.remove(getKey(deviceId, action));
     }
 
     public void response(Message<?> message) throws MessagingException {
-        String topic = message.getHeaders().get(MqttHeaders.TOPIC, String.class);
-        String[] split = topic.split("/");
-        topic = getKey(split[2], split[1]);
-        RendezvousChannel responseChannel = topicSubscribers.get(topic);
+        String[] split = message.getHeaders().get(MqttHeaders.TOPIC, String.class).split("/");
+        String key = getKey(split[2], split[1]);
+        RendezvousChannel responseChannel = topicSubscribers.get(key);
         if (responseChannel != null)
             responseChannel.send(message);
     }

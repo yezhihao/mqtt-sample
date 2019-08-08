@@ -7,7 +7,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by Alan.ye on 18/5/23.
+ * Created by Alan on 2017/5/23.
  */
 @Component
 public class UpstreamRouter {

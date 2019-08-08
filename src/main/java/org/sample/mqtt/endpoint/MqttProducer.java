@@ -7,7 +7,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by alan on 2017/2/14.
+ * Created by Alan on 2017/2/14.
  */
 @Component
 @MessagingGateway(defaultRequestChannel = "mqttOutboundChannel")
