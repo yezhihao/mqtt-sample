@@ -18,7 +18,7 @@ public class MqttController {
 
     @ApiOperation(value = "发送通知消息（无返回报文）")
     @RequestMapping(path = "send/notice")
-    public void sendNotice(@ApiParam(value = "原始Topic", required = true) @RequestParam(defaultValue = "ser/test/12345/nak") String topic,
+    public void sendNotice(@ApiParam(value = "原始Topic", required = true) @RequestParam(defaultValue = "mqtt/location") String topic,
                            @ApiParam(value = "消息体") @RequestParam(defaultValue = "{code:500,message:\"error action!\"}") String message) {
         messageService.sendNotice(topic, message);
     }

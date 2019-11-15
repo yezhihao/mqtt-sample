@@ -27,8 +27,7 @@ public class ResponseHandler implements MessageHandler {
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
         String topic = message.getHeaders().get(MqttHeaders.TOPIC, String.class);
-        String content = String.valueOf(message.getPayload());
-        logger.info("{} : {}", topic, content);
+        Object payload = message.getPayload();
         messageService.response(message);
     }
 }

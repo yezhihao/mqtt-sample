@@ -21,8 +21,9 @@ public class NoticeHandler implements MessageHandler {
     @ServiceActivator(inputChannel = UpstreamRouter.NoticeChannel, poller = @Poller(fixedDelay = "300", maxMessagesPerPoll = "1"))
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
-        String topic = message.getHeaders().get(MqttHeaders.TOPIC, String.class);
+        String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC, String.class);
         String content = String.valueOf(message.getPayload());
-        logger.info("{} : {}", topic, content);
+
+        logger.info(topic + " : " + content);
     }
 }

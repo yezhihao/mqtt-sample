@@ -14,6 +14,6 @@ import org.springframework.stereotype.Component;
 public interface MqttProducer {
 
     @Gateway(replyTimeout = 2, requestTimeout = 200)
-    void sendTo(@Header(MqttHeaders.TOPIC) String topic, String payload);
+    void sendTo(@Header(MqttHeaders.TOPIC) String topic, Object payload);
 
 }
