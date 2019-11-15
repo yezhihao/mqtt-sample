@@ -22,29 +22,34 @@ public class MessageService {
     @Autowired
     private MqttProducer mqttProducer;
 
-    public void sendNotice(String topic, String payload) {
-        if (payload == null)
-            payload = "";
+    public void sendNotice(String topic, Object payload) {
         mqttProducer.sendTo(topic, payload);
     }
 
-    public String sendMessage(String deviceId, String action, String payload) {
+    public void sendNotice(String deviceId, String action, Object payload) {
+        mqttProducer.sendTo(deviceId + "/" + action, payload);
+    }
+
+    public Message sendMessage(String deviceId, String action, Object payload) {
+        return sendMessage(deviceId, action, payload, 5000);
+    }
+
+    public Message sendMessage(String deviceId, String action, Object payload, long timeout) {
         if (payload == null)
             payload = "";
+
         RendezvousChannel responseChannel = subscribeTopic(deviceId, action);
         if (responseChannel == null)
-            return "REJ";
+            return null;
 
-        String result = "NAK";
+        Message response;
         try {
             mqttProducer.sendTo(deviceId + "/" + action, payload);
-            Message<?> response = responseChannel.receive(20000);
-            if (response != null)
-                result = (String) response.getPayload();
+            response = responseChannel.receive(timeout);
         } finally {
             unSubscribeTopic(deviceId, action);
         }
-        return result;
+        return response;
     }
 
     public RendezvousChannel subscribeTopic(String deviceId, String action) {
@@ -56,15 +61,16 @@ public class MessageService {
     }
 
     public void unSubscribeTopic(String deviceId, String action) {
-        topicSubscribers.remove(getKey(deviceId, action));
+        String key = getKey(deviceId, action);
+        topicSubscribers.remove(key);
     }
 
-    public void response(Message<?> message) throws MessagingException {
-        String[] split = message.getHeaders().get(MqttHeaders.TOPIC, String.class).split("/");
-        String key = getKey(split[2], split[1]);
-        RendezvousChannel responseChannel = topicSubscribers.get(key);
+    public boolean response(Message message) throws MessagingException {
+        String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC, String.class);
+        RendezvousChannel responseChannel = topicSubscribers.get(topic);
         if (responseChannel != null)
-            responseChannel.send(message);
+            return responseChannel.send(message);
+        return false;
     }
 
     private String getKey(String deviceId, String action) {

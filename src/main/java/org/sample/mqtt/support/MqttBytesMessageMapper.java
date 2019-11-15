@@ -24,7 +24,7 @@ public class MqttBytesMessageMapper implements BytesMessageMapper {
 
     @Override
     public Message<?> toMessage(byte[] bytes, Map<String, Object> headers) {
-        String topic = (String) headers.get(MqttHeaders.TOPIC);
+        String topic = (String) headers.get(MqttHeaders.RECEIVED_TOPIC);
         Class clazz = null;
 
         Set<Map.Entry<String, Class>> entries = mapper.entrySet();
