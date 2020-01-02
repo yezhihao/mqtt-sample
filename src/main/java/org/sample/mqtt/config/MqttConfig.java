@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
-import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
@@ -18,8 +17,6 @@ import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.MqttMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
-
-import java.util.UUID;
 
 @Configuration
 @EnableIntegration
@@ -44,7 +41,8 @@ public class MqttConfig {
     @Value("${mqtt.converter-class}")
     private Class<? extends MqttMessageConverter> converterClass;
 
-    private static final String serverId = UUID.randomUUID().toString();
+    @Value("${mqtt.client-id-prefix}")
+    private String clientIdPrefix;
 
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
@@ -66,7 +64,7 @@ public class MqttConfig {
     @Bean
     @ServiceActivator(inputChannel = "mqttOutboundChannel")
     public MessageHandler mqttOutbound() {
-        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler("server_pub_" + serverId, mqttClientFactory());
+        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(clientIdPrefix + "_outbound", mqttClientFactory());
         messageHandler.setConverter(bytesMessageConverter());
         messageHandler.setCompletionTimeout(5000);
         messageHandler.setAsync(true);
@@ -75,7 +73,7 @@ public class MqttConfig {
 
     @Bean
     public MessageProducer mqttInbound() {
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("server_sub_" + serverId, mqttClientFactory(), subTopics);
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(clientIdPrefix + "_inbound", mqttClientFactory(), subTopics);
         adapter.setConverter(bytesMessageConverter());
         adapter.setOutputChannel(mqttInboundChannel());
         adapter.setCompletionTimeout(5000);
@@ -91,15 +89,5 @@ public class MqttConfig {
     @Bean
     public MessageChannel mqttInboundChannel() {
         return new DirectChannel();
-    }
-
-    @Bean
-    public MessageChannel noticeChannel() {
-        return new QueueChannel(50);
-    }
-
-    @Bean
-    public MessageChannel responseChannel() {
-        return new QueueChannel(50);
     }
 }

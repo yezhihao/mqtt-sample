@@ -61,7 +61,7 @@ public class BytesMessageConverter implements MqttMessageConverter, BeanFactoryA
     public Message<?> toMessage(String topic, MqttMessage mqttMessage) {
         try {
             AbstractIntegrationMessageBuilder<?> messageBuilder;
-            Message<?> message = bytesMessageMapper.toMessage(mqttMessage.getPayload(), ImmutableMap.of(MqttHeaders.RECEIVED_TOPIC, topic));
+            Message<?> message = bytesMessageMapper.toMessage(mqttMessage.getPayload(), ImmutableMap.of(MqttHeaders.TOPIC, topic));
 
             messageBuilder = messageBuilderFactory.fromMessage(message);
 
