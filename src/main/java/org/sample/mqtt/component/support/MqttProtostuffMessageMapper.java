@@ -65,7 +65,7 @@ public class MqttProtostuffMessageMapper implements BytesMessageMapper {
                 sb.append(topic);
                 sb.append("\nstring ").append(new String(bytes));
                 sb.append("\nbase64 ").append(Base64.getEncoder().encodeToString(bytes));
-                logger.error(sb.toString());
+                logger.error(sb.toString(), e);
                 throw e;
             }
         } else {
