@@ -7,10 +7,12 @@ mqtt:
   username: admin
   password: abc@123
   keep-alive-interval: 60
+
   #$SYS/brokers/+/clients/#（emq支持上下线通知）
   #iot_server/# 服务端订阅
   #iot_client/test123/# 模拟终端回复设备ID为test123
   sub-topics: $SYS/brokers/+/clients/#,iot_server/#,iot_client/test123/#
   message-mapper: org.sample.mqtt.component.support.MqttJsonMessageMapper
-#  message-mapper: org.sample.mqtt.component.support.MqttProtostuffMessageMapper
-  model-packages: org.sample.mqtt.model.toserver,org.sample.mqtt.model.toclient
+  #message-mapper: org.sample.mqtt.component.support.MqttProtostuffMessageMapper
+  #传输模型所在的包
+  model-packages: org.sample.mqtt.model.toserver
