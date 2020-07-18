@@ -7,7 +7,7 @@ import org.sample.mqtt.component.model.MqttRequest;
 /**
  * 配置参数更新
  */
-@Topic("iot_client/{deviceId}/setting/update")
+@Topic("iot_client/{deviceId}/settings")
 public class SettingUpdate extends MqttRequest {
 
     @Tag(2)
