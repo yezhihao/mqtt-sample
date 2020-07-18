@@ -37,8 +37,8 @@ public class MessageService {
 
 
     public MqttResponse sendMessage(String deviceId, MqttRequest payload, long timeout) {
-        Class<? extends MqttRequest> aClass = payload.getClass();
-        Topic annotation = aClass.getAnnotation(Topic.class);
+        Class<? extends MqttRequest> clazz = payload.getClass();
+        Topic annotation = clazz.getAnnotation(Topic.class);
         String value = annotation.value();
         String topic = value.replace("{deviceId}", deviceId);
 
@@ -46,7 +46,8 @@ public class MessageService {
         if (messageId == 0L)
             payload.setMessageId(messageId = System.currentTimeMillis());
 
-        RendezvousChannel responseChannel = subscribeTopic(deviceId, messageId);
+        String key = getKey(deviceId, messageId);
+        RendezvousChannel responseChannel = subscribeTopic(key);
         if (responseChannel == null)
             return null;
 
@@ -56,21 +57,20 @@ public class MessageService {
             if (response != null)
                 return response.getPayload();
         } finally {
-            unSubscribeTopic(deviceId, messageId);
+            unSubscribeTopic(key);
         }
         return null;
     }
 
-    private RendezvousChannel subscribeTopic(String deviceId, long messageId) {
-        String key = getKey(deviceId, messageId);
+    private RendezvousChannel subscribeTopic(String key) {
         RendezvousChannel result = null;
         if (!topicSubscribers.containsKey(key))
             topicSubscribers.put(key, result = new RendezvousChannel());
         return result;
     }
 
-    private void unSubscribeTopic(String deviceId, long messageId) {
-        topicSubscribers.remove(getKey(deviceId, messageId));
+    private void unSubscribeTopic(String key) {
+        topicSubscribers.remove(key);
     }
 
     public boolean response(Message<MqttResponse> message) throws MessagingException {
