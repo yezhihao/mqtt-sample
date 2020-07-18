@@ -1,13 +1,10 @@
 #mqtt-sample
-http://127.0.0.1:8080/swagger-ui.html
 
-swagger文档中定义的两个接口用于测试同步消息和异步消息
-
-topic设计原则：
-设备端订阅的topic以“iot_client/”开头，依次为设备ID“deivceId/”，结尾为动作“action”
+#### topic设计原则：
+#### 1.设备端订阅的topic以“iot_client/”开头，依次为设备ID“deivceId/”，结尾为动作“action”
 例如：iot_client/test123/settings
 
-服务端订阅的topic以“iot_server/”开头，依次为动作“action/”，结尾为设备ID“deivceId”
+#### 2.服务端订阅的topic以“iot_server/”开头，依次为动作“action/”，结尾为设备ID“deivceId”
 例如：iot_server/reply/test123
 
 注意到设备端和服务端的action和deviceId互换了位置
@@ -24,3 +21,8 @@ public class Location {
 ...
 }
 
+
+swagger文档中定义的两个接口用于测试同步消息和异步消息
+http://127.0.0.1:8080/swagger-ui.html
+
+技术交流群：906230542
