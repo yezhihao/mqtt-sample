@@ -8,7 +8,6 @@ import org.sample.mqtt.service.impl.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.channel.RendezvousChannel;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -66,7 +65,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public boolean response(Message<MqttResponse> message) throws MessagingException {
+    public boolean response(Message<MqttResponse> message) {
         MqttResponse payload = message.getPayload();
         RendezvousChannel responseChannel = topicSubscribers.get(getKey(payload.getDeviceId(), payload.getMessageId()));
         if (responseChannel != null)

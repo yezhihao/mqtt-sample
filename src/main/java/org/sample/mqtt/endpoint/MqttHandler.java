@@ -34,10 +34,10 @@ public class MqttHandler implements MessageHandler {
     public void handleMessage(Message<?> message) throws MessagingException {
         String topic = message.getHeaders().get(MqttHeaders.TOPIC, String.class);
         Object payload = message.getPayload();
+        logger.debug(topic + payload);
 
         if (topic.startsWith("$")) {
-            //TODO emq支持设备上线离线通知
-            logger.info((String) payload);
+            //TODO emq支持设备上线&离线通知
             if (topic.endsWith("disconnected")) {
                 JsonUtils.toObj((String) payload, Disconnected.class);
             } else if (topic.endsWith("connected")) {
@@ -50,7 +50,6 @@ public class MqttHandler implements MessageHandler {
                     messageService.response((Message<MqttResponse>) message);
                 } else {
                     //TODO 服务端业务处理
-                    logger.debug("\n{}: {}", topic, JsonUtils.toJson(payload));
                 }
 
                 //TODO 模拟客户端回复消息

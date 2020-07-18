@@ -3,7 +3,6 @@ package org.sample.mqtt.service.impl;
 import org.sample.mqtt.component.model.MqttRequest;
 import org.sample.mqtt.component.model.MqttResponse;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
 
 /**
  * Created by Alan on 2020/7/18.
@@ -16,5 +15,5 @@ public interface MessageService {
 
     MqttResponse request(String deviceId, MqttRequest payload, long timeout);
 
-    boolean response(Message<MqttResponse> message) throws MessagingException;
+    boolean response(Message<MqttResponse> message);
 }
