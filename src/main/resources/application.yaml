@@ -3,12 +3,14 @@ server:
 
 mqtt:
   client-id-prefix: dev
-  server-uris: tcp://127.0.0.1:1883
+  server-uris: tcp://mqtt.fluux.io:1883
   username: admin
   password: abc@123
   keep-alive-interval: 60
-  #模拟终端回复订阅iot_client/ 设备ID为test123
-  sub-topics: iot_server/#,$SYS/brokers/+/clients/#,iot_client/test123/#
+  #$SYS/brokers/+/clients/#（emq支持上下线通知）
+  #iot_server/# 服务端订阅
+  #iot_client/test123/# 模拟终端回复设备ID为test123
+  sub-topics: $SYS/brokers/+/clients/#,iot_server/#,iot_client/test123/#
   message-mapper: org.sample.mqtt.component.support.MqttJsonMessageMapper
 #  message-mapper: org.sample.mqtt.component.support.MqttProtostuffMessageMapper
   model-packages: org.sample.mqtt.model.toserver,org.sample.mqtt.model.toclient
