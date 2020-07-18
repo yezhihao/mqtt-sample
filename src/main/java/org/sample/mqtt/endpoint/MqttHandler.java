@@ -7,7 +7,7 @@ import org.sample.mqtt.component.model.MqttRequest;
 import org.sample.mqtt.component.model.MqttResponse;
 import org.sample.mqtt.model.toclient.SettingUpdate;
 import org.sample.mqtt.model.toserver.CommonResponse;
-import org.sample.mqtt.service.MessageService;
+import org.sample.mqtt.service.impl.MessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class MqttHandler implements MessageHandler {
                     String deviceId = "test123";
                     MqttRequest request = JsonUtils.toObj((String) payload, SettingUpdate.class);
                     CommonResponse commonResponse = new CommonResponse(request.getMessageId(), deviceId, (byte) 0);
-                    messageService.sendNotice(deviceId, commonResponse);
+                    messageService.notify(deviceId, commonResponse);
                 }
             } catch (Exception e) {
                 logger.error("\n系统出错: " + JsonUtils.toJson(payload), e);
