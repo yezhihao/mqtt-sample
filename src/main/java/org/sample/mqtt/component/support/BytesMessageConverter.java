@@ -1,4 +1,4 @@
-package org.sample.mqtt.support;
+package org.sample.mqtt.component.support;
 
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -21,7 +21,7 @@ import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.util.Assert;
 
 /**
- * 自定义的字节转换器(基于Protostuff)
+ * 自定义的消息转换器
  * Created by Alan on 2019/8/7
  */
 public class BytesMessageConverter implements MqttMessageConverter, BeanFactoryAware {
@@ -42,12 +42,12 @@ public class BytesMessageConverter implements MqttMessageConverter, BeanFactoryA
 
     private volatile MessageBuilderFactory messageBuilderFactory;
 
-    public BytesMessageConverter() {
+    public BytesMessageConverter(BytesMessageMapper bytesMessageMapper) {
         this.defaultQos = 0;
         this.qosProcessor = MqttMessageConverter.defaultQosProcessor();
         this.defaultRetained = false;
         this.retainedProcessor = MqttMessageConverter.defaultRetainedProcessor();
-        this.bytesMessageMapper = new MqttBytesMessageMapper();
+        this.bytesMessageMapper = bytesMessageMapper;
         this.messageBuilderFactory = new DefaultMessageBuilderFactory();
     }
 

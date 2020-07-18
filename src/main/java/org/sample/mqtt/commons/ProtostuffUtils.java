@@ -1,11 +1,8 @@
-package org.sample.mqtt.support;
+package org.sample.mqtt.commons;
 
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 public class ProtostuffUtils {
 
@@ -24,13 +21,8 @@ public class ProtostuffUtils {
     }
 
     public static <T> T decode(Schema<T> schema, byte[] bytes) {
-        try (ByteArrayInputStream is = new ByteArrayInputStream(bytes)) {
-
-            T result = schema.newMessage();
-            ProtostuffIOUtil.mergeFrom(is, result, schema);
-            return result;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        T result = schema.newMessage();
+        ProtostuffIOUtil.mergeFrom(bytes, result, schema);
+        return result;
     }
 }

@@ -1,11 +1,13 @@
-package org.sample.mqtt.model;
+package org.sample.mqtt.model.toserver;
 
 import io.protostuff.Tag;
+import org.sample.mqtt.component.annotations.Topic;
 
 /**
  * 位置信息上报
- * mqtt/location/{deviceId}
+ * 通知类消息不需要继承 MqttResponse
  */
+@Topic("iot_server/location/{deviceId}")
 public class Location {
 
     @Tag(1)
