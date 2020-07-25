@@ -5,6 +5,7 @@
 .idea
 .springBeans
 
+.git*
 *.log
 *.war
 *.ear
