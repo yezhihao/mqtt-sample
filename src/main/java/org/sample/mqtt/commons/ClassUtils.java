@@ -13,7 +13,7 @@ import java.util.jar.JarFile;
 
 /**
  * @author yezhihao
- * home https://gitee.com/yezhihao/jt808-server
+ * home https://gitee.com/yezhihao
  */
 public class ClassUtils {
 
