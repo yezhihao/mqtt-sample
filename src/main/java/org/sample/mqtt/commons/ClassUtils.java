@@ -1,21 +1,21 @@
 package org.sample.mqtt.commons;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
-
 import java.io.File;
-import java.io.FileFilter;
 import java.lang.annotation.Annotation;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
+/**
+ * @author yezhihao
+ * home https://gitee.com/yezhihao/jt808-server
+ */
 public class ClassUtils {
-
-    private static final Logger logger = LoggerFactory.getLogger(ClassUtils.class.getSimpleName());
 
     public static List<Class<?>> getClassList(String packageName, Class<? extends Annotation> annotationClass) {
         List<Class<?>> classList = getClassList(packageName);
@@ -30,16 +30,36 @@ public class ClassUtils {
 
     public static List<Class<?>> getClassList(String packageName) {
         List<Class<?>> classList = new LinkedList();
+        String path = packageName.replace(".", "/");
         try {
+            Enumeration<URL> urls = ClassUtils.getClassLoader().getResources(path);
+            while (urls.hasMoreElements()) {
+                URL url = urls.nextElement();
 
-            ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resourcePatternResolver.getResources(packageName.replace(".", "/") + "/**/*.class");
-            for (Resource resource : resources) {
-                String url = resource.getURL().toString();
-                String className = url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
-                doAddClass(classList, packageName + "." + className);
+                if (url != null) {
+                    String protocol = url.getProtocol();
+
+                    if (protocol.equals("file")) {
+                        addClass(classList, url.toURI().getPath(), packageName);
+
+                    } else if (protocol.equals("jar")) {
+                        JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
+                        JarFile jarFile = jarURLConnection.getJarFile();
+
+                        Enumeration<JarEntry> jarEntries = jarFile.entries();
+                        while (jarEntries.hasMoreElements()) {
+
+                            JarEntry jarEntry = jarEntries.nextElement();
+                            String entryName = jarEntry.getName();
+
+                            if (entryName.startsWith(path) && entryName.endsWith(".class")) {
+                                String className = entryName.substring(0, entryName.lastIndexOf(".")).replaceAll("/", ".");
+                                addClass(classList, className);
+                            }
+                        }
+                    }
+                }
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -48,12 +68,7 @@ public class ClassUtils {
 
     private static void addClass(List<Class<?>> classList, String packagePath, String packageName) {
         try {
-            File[] files = new File(packagePath).listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File file) {
-                    return (file.isFile() && file.getName().endsWith(".class")) || file.isDirectory();
-                }
-            });
+            File[] files = new File(packagePath).listFiles(file -> (file.isDirectory() || file.getName().endsWith(".class")));
             if (files != null)
                 for (File file : files) {
                     String fileName = file.getName();
@@ -62,10 +77,10 @@ public class ClassUtils {
                         if (packageName != null) {
                             className = packageName + "." + className;
                         }
-                        doAddClass(classList, className);
+                        addClass(classList, className);
                     } else {
                         String subPackagePath = fileName;
-                        if (packagePath != null) {
+                        if (packageName != null) {
                             subPackagePath = packagePath + "/" + subPackagePath;
                         }
                         String subPackageName = fileName;
@@ -80,19 +95,16 @@ public class ClassUtils {
         }
     }
 
-    private static void doAddClass(List<Class<?>> classList, String className) {
-        Class<?> cls = loadClass(className, false);
-        classList.add(cls);
+    private static void addClass(List<Class<?>> classList, String className) {
+        classList.add(loadClass(className, false));
     }
 
     public static Class<?> loadClass(String className, boolean isInitialized) {
-        Class<?> cls;
         try {
-            cls = Class.forName(className, isInitialized, getClassLoader());
+            return Class.forName(className, isInitialized, getClassLoader());
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        return cls;
     }
 
     public static ClassLoader getClassLoader() {
