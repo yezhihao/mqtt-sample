@@ -3,16 +3,14 @@ server:
 
 mqtt:
   client-id-prefix: dev
-  server-uris: tcp://mqtt.fluux.io:1883
+  server-uris: tcp://broker.emqx.io:1883
   username: admin
   password: abc@123
   keep-alive-interval: 60
-
-  #$SYS/brokers/+/clients/#（emq支持上下线通知）
-  #iot_server/# 服务端订阅
-  #iot_client/test123/# 模拟终端回复设备ID为test123
-  sub-topics: $SYS/brokers/+/clients/#,iot_server/#,iot_client/test123/#
-  message-mapper: org.sample.mqtt.component.support.MqttJsonMessageMapper
-  #message-mapper: org.sample.mqtt.component.support.MqttProtostuffMessageMapper
-  #传输模型所在的包
-  model-packages: org.sample.mqtt.model.toserver
+  message-mapper: org.sample.mqtt.component.support.MqttJsonMessageMapper #使用JSON序列化
+  #message-mapper: org.sample.mqtt.component.support.MqttProtostuffMessageMapper #使用Protostuff序列化
+  model-packages: org.sample.mqtt.model.toserver #传输模型所在的包
+  sub-topics:
+    - $SYS/brokers/+/clients/#   #EMQX支持订阅上下线通知
+    - iot_server/#               #服务端订阅
+    - iot_client/test123/#       #模拟终端回复设备ID为test123

@@ -5,7 +5,6 @@ import java.lang.annotation.Annotation;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -17,19 +16,14 @@ import java.util.jar.JarFile;
  */
 public class ClassUtils {
 
-    public static List<Class<?>> getClassList(String packageName, Class<? extends Annotation> annotationClass) {
-        List<Class<?>> classList = getClassList(packageName);
-        Iterator<Class<?>> iterator = classList.iterator();
-        while (iterator.hasNext()) {
-            Class<?> next = iterator.next();
-            if (!next.isAnnotationPresent(annotationClass))
-                iterator.remove();
-        }
+    public static List<Class> getClassList(String packageName, Class<? extends Annotation> annotationClass) {
+        List<Class> classList = getClassList(packageName);
+        classList.removeIf(next -> !next.isAnnotationPresent(annotationClass));
         return classList;
     }
 
-    public static List<Class<?>> getClassList(String packageName) {
-        List<Class<?>> classList = new LinkedList();
+    public static List<Class> getClassList(String packageName) {
+        List<Class> classList = new LinkedList<>();
         String path = packageName.replace(".", "/");
         try {
             Enumeration<URL> urls = ClassUtils.getClassLoader().getResources(path);
@@ -61,12 +55,12 @@ public class ClassUtils {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Initial class error!");
         }
         return classList;
     }
 
-    private static void addClass(List<Class<?>> classList, String packagePath, String packageName) {
+    private static void addClass(List<Class> classList, String packagePath, String packageName) {
         try {
             File[] files = new File(packagePath).listFiles(file -> (file.isDirectory() || file.getName().endsWith(".class")));
             if (files != null)
@@ -95,11 +89,11 @@ public class ClassUtils {
         }
     }
 
-    private static void addClass(List<Class<?>> classList, String className) {
+    private static void addClass(List<Class> classList, String className) {
         classList.add(loadClass(className, false));
     }
 
-    public static Class<?> loadClass(String className, boolean isInitialized) {
+    public static Class loadClass(String className, boolean isInitialized) {
         try {
             return Class.forName(className, isInitialized, getClassLoader());
         } catch (ClassNotFoundException e) {

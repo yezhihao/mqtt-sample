@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  */
 public class BytesMessageConverter implements MqttMessageConverter, BeanFactoryAware {
 
-    private static final Logger logger = LoggerFactory.getLogger(BytesMessageConverter.class.getSimpleName());
+    private static final Logger log = LoggerFactory.getLogger(BytesMessageConverter.class);
 
     private final int defaultQos;
 
@@ -73,7 +73,7 @@ public class BytesMessageConverter implements MqttMessageConverter, BeanFactoryA
 
             return messageBuilder.build();
         } catch (Exception e) {
-            logger.error("failed to convert object to Message", e);
+            log.error("failed to convert object to Message", e);
             throw new MessageConversionException("failed to convert object to Message", e);
         }
     }
@@ -93,7 +93,7 @@ public class BytesMessageConverter implements MqttMessageConverter, BeanFactoryA
         try {
             return this.bytesMessageMapper.fromMessage(message);
         } catch (Exception e) {
-            logger.error("Failed to map outbound message", e);
+            log.error("Failed to map outbound message", e);
             throw new MessageHandlingException(message, "Failed to map outbound message", e);
         }
     }

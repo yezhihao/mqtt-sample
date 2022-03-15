@@ -25,15 +25,15 @@ import java.util.Map;
  */
 public class MqttProtostuffMessageMapper implements BytesMessageMapper {
 
-    private static final Logger logger = LoggerFactory.getLogger(BytesMessageMapper.class.getSimpleName());
+    private static final Logger log = LoggerFactory.getLogger(BytesMessageMapper.class);
 
     private static Map<String, Class> mapper = new HashMap<>();
 
     public MqttProtostuffMessageMapper(String modelPackages) {
         String[] packages = modelPackages.split(",");
         for (String aPackage : packages) {
-            List<Class<?>> classList = ClassUtils.getClassList(aPackage, Topic.class);
-            for (Class<?> clazz : classList) {
+            List<Class> classList = ClassUtils.getClassList(aPackage, Topic.class);
+            for (Class clazz : classList) {
                 addClass(clazz);
             }
             System.out.println("add mapper:" + classList.size());
@@ -65,7 +65,7 @@ public class MqttProtostuffMessageMapper implements BytesMessageMapper {
                 sb.append(topic);
                 sb.append("\nstring ").append(new String(bytes));
                 sb.append("\nbase64 ").append(Base64.getEncoder().encodeToString(bytes));
-                logger.error(sb.toString(), e);
+                log.error(sb.toString(), e);
                 throw e;
             }
         } else {

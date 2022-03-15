@@ -3,7 +3,7 @@ package org.sample.mqtt.config;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.sample.mqtt.component.support.BytesMessageConverter;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.IntegrationComponentScan;
@@ -20,37 +20,26 @@ import org.springframework.integration.mqtt.support.MqttMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
-@Configuration
 @EnableIntegration
+@Configuration
+@ConfigurationProperties(prefix = "mqtt")
 @IntegrationComponentScan(basePackages = "org.sample.mqtt")
 public class MqttConfig {
 
-    @Value("${mqtt.server-uris}")
-    private String[] serverURIs;
-
-    @Value("${mqtt.username}")
+    private String[] serverUris;
     private String username;
-
-    @Value("${mqtt.password}")
     private char[] password;
-
-    @Value("${mqtt.keep-alive-interval}")
     private int keepAliveInterval;
-
-    @Value("${mqtt.sub-topics}")
     private String[] subTopics;
-
-    @Value("${mqtt.message-mapper}")
-    private Class<? extends BytesMessageMapper> mapperClass;
-
-    @Value("${mqtt.client-id-prefix}")
+    private Class<? extends BytesMessageMapper> messageMapper;
     private String clientIdPrefix;
+    private String modelPackages;
 
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
-        options.setServerURIs(serverURIs);
+        options.setServerURIs(serverUris);
         options.setUserName(username);
         options.setPassword(password);
         options.setKeepAliveInterval(keepAliveInterval);
@@ -59,8 +48,8 @@ public class MqttConfig {
     }
 
     @Bean
-    public MqttMessageConverter bytesMessageConverter(@Value("${mqtt.model-packages}") String modelPackages) throws NoSuchMethodException {
-        BytesMessageMapper bytesMessageMapper = BeanUtils.instantiateClass(mapperClass.getConstructor(String.class), modelPackages);
+    public MqttMessageConverter bytesMessageConverter() throws NoSuchMethodException {
+        BytesMessageMapper bytesMessageMapper = BeanUtils.instantiateClass(messageMapper.getConstructor(String.class), modelPackages);
         return new BytesMessageConverter(bytesMessageMapper);
     }
 
@@ -92,5 +81,69 @@ public class MqttConfig {
     @Bean
     public MessageChannel mqttInboundChannel() {
         return new DirectChannel();
+    }
+
+    public String[] getServerUris() {
+        return serverUris;
+    }
+
+    public void setServerUris(String[] serverUris) {
+        this.serverUris = serverUris;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public char[] getPassword() {
+        return password;
+    }
+
+    public void setPassword(char[] password) {
+        this.password = password;
+    }
+
+    public int getKeepAliveInterval() {
+        return keepAliveInterval;
+    }
+
+    public void setKeepAliveInterval(int keepAliveInterval) {
+        this.keepAliveInterval = keepAliveInterval;
+    }
+
+    public String[] getSubTopics() {
+        return subTopics;
+    }
+
+    public void setSubTopics(String[] subTopics) {
+        this.subTopics = subTopics;
+    }
+
+    public Class<? extends BytesMessageMapper> getMessageMapper() {
+        return messageMapper;
+    }
+
+    public void setMessageMapper(Class<? extends BytesMessageMapper> messageMapper) {
+        this.messageMapper = messageMapper;
+    }
+
+    public String getClientIdPrefix() {
+        return clientIdPrefix;
+    }
+
+    public void setClientIdPrefix(String clientIdPrefix) {
+        this.clientIdPrefix = clientIdPrefix;
+    }
+
+    public String getModelPackages() {
+        return modelPackages;
+    }
+
+    public void setModelPackages(String modelPackages) {
+        this.modelPackages = modelPackages;
     }
 }

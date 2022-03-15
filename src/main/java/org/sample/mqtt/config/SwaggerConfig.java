@@ -23,7 +23,7 @@ public class SwaggerConfig {
                 .description("mqtt api")
                 .license("")
                 .licenseUrl("")
-                .termsOfServiceUrl("")
+                .termsOfServiceUrl("https://gitee.com/yezhihao")
                 .version("1.0.0")
                 .contact(new Contact("", "", ""))
                 .build();
@@ -31,11 +31,10 @@ public class SwaggerConfig {
 
     @Bean
     public Docket customImplementation() {
-        Docket docket = new Docket(DocumentationType.SWAGGER_2)
+        return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("org.sample.mqtt.controller"))
                 .build()
                 .apiInfo(apiInfo());
-        return docket;
     }
 }

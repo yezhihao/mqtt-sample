@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MqttHandler implements MessageHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttHandler.class.getSimpleName());
+    private static final Logger log = LoggerFactory.getLogger(MqttHandler.class);
 
     @Autowired
     private MessageService messageService;
@@ -34,7 +34,7 @@ public class MqttHandler implements MessageHandler {
     public void handleMessage(Message<?> message) throws MessagingException {
         String topic = message.getHeaders().get(MqttHeaders.TOPIC, String.class);
         Object payload = message.getPayload();
-        logger.debug(topic + payload);
+        log.debug("{}\t{}", topic, payload);
 
         if (topic.startsWith("$")) {
             //TODO emq支持设备上线&离线通知
@@ -60,7 +60,7 @@ public class MqttHandler implements MessageHandler {
                     messageService.notify(deviceId, commonResponse);
                 }
             } catch (Exception e) {
-                logger.error("\n系统出错: " + JsonUtils.toJson(payload), e);
+                log.error("\n系统出错: " + JsonUtils.toJson(payload), e);
             }
         }
     }

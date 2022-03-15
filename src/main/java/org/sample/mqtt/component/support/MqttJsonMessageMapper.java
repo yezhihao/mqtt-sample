@@ -21,15 +21,15 @@ import java.util.Map;
  */
 public class MqttJsonMessageMapper implements BytesMessageMapper {
 
-    private static final Logger logger = LoggerFactory.getLogger(BytesMessageMapper.class.getSimpleName());
+    private static final Logger log = LoggerFactory.getLogger(BytesMessageMapper.class);
 
     private static Map<String, Class> mapper = new HashMap<>();
 
     public MqttJsonMessageMapper(String modelPackages) {
         String[] packages = modelPackages.split(",");
         for (String aPackage : packages) {
-            List<Class<?>> classList = ClassUtils.getClassList(aPackage, Topic.class);
-            for (Class<?> clazz : classList) {
+            List<Class> classList = ClassUtils.getClassList(aPackage, Topic.class);
+            for (Class clazz : classList) {
                 addClass(clazz);
             }
             System.out.println("add mapper:" + classList.size());
@@ -59,7 +59,7 @@ public class MqttJsonMessageMapper implements BytesMessageMapper {
                 sb.append(clazz.getName());
                 sb.append(topic);
                 sb.append("\nstring ").append(str);
-                logger.error(sb.toString());
+                log.error(sb.toString());
                 throw e;
             }
         } else {
