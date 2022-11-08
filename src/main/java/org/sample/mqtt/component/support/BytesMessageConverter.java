@@ -1,6 +1,5 @@
 package org.sample.mqtt.component.support;
 
-import com.google.common.collect.ImmutableMap;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +18,8 @@ import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.util.Assert;
+
+import java.util.Collections;
 
 /**
  * 自定义的消息转换器
@@ -58,10 +59,10 @@ public class BytesMessageConverter implements MqttMessageConverter, BeanFactoryA
     }
 
     @Override
-    public Message<?> toMessage(String topic, MqttMessage mqttMessage) {
+    public AbstractIntegrationMessageBuilder<?> toMessageBuilder(String topic, MqttMessage mqttMessage) {
         try {
             AbstractIntegrationMessageBuilder<?> messageBuilder;
-            Message<?> message = bytesMessageMapper.toMessage(mqttMessage.getPayload(), ImmutableMap.of(MqttHeaders.TOPIC, topic));
+            Message<?> message = bytesMessageMapper.toMessage(mqttMessage.getPayload(), Collections.singletonMap(MqttHeaders.TOPIC, topic));
 
             messageBuilder = messageBuilderFactory.fromMessage(message);
 
@@ -71,7 +72,7 @@ public class BytesMessageConverter implements MqttMessageConverter, BeanFactoryA
                     .setHeader(MqttHeaders.RECEIVED_RETAINED, mqttMessage.isRetained())
                     .setHeader(MqttHeaders.RECEIVED_TOPIC, topic);
 
-            return messageBuilder.build();
+            return messageBuilder;
         } catch (Exception e) {
             log.error("failed to convert object to Message", e);
             throw new MessageConversionException("failed to convert object to Message", e);

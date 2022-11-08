@@ -6,12 +6,14 @@ import org.sample.mqtt.component.model.MqttResponse;
 import org.sample.mqtt.endpoint.MqttProducer;
 import org.sample.mqtt.service.impl.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.integration.channel.RendezvousChannel;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * Created by Alan on 2019/8/7.
@@ -19,7 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class MessageServiceImpl implements MessageService {
 
-    private Map<String, RendezvousChannel> topicSubscribers = new ConcurrentHashMap<>();
+    private static final Mono<MqttResponse> Rejected = Mono.error(new RejectedExecutionException("客户端暂未响应，请勿重复发送"));
+
+    private Map<String, MonoSink<MqttResponse>> topicSubscribers = new ConcurrentHashMap<>();
 
     @Autowired
     private MqttProducer mqttProducer;
@@ -33,12 +37,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public MqttResponse request(String deviceId, MqttRequest payload) {
-        return request(deviceId, payload, 10000);
-    }
-
-    @Override
-    public MqttResponse request(String deviceId, MqttRequest payload, long timeout) {
+    public Mono<MqttResponse> request(String deviceId, MqttRequest payload) {
         Class<? extends MqttRequest> clazz = payload.getClass();
         Topic annotation = clazz.getAnnotation(Topic.class);
         String value = annotation.value();
@@ -49,27 +48,24 @@ public class MessageServiceImpl implements MessageService {
             payload.setMessageId(messageId = System.currentTimeMillis());
 
         String key = getKey(deviceId, messageId);
-        RendezvousChannel responseChannel = subscribe(key);
-        if (responseChannel == null)
-            return null;
+        Mono<MqttResponse> receive = subscribe(key);
+        if (receive == null)
+            return Rejected;
 
-        try {
+        return Mono.create(sink -> {
             mqttProducer.sendTo(topic, payload);
-            Message<MqttResponse> response = (Message<MqttResponse>) responseChannel.receive(timeout);
-            if (response != null)
-                return response.getPayload();
-        } finally {
-            unSubscribe(key);
-        }
-        return null;
+            sink.success();
+        }).then(receive).doFinally(signal -> unSubscribe(key));
     }
 
     @Override
     public boolean response(Message<MqttResponse> message) {
         MqttResponse payload = message.getPayload();
-        RendezvousChannel responseChannel = topicSubscribers.get(getKey(payload.getDeviceId(), payload.getMessageId()));
-        if (responseChannel != null)
-            return responseChannel.send(message);
+        MonoSink<MqttResponse> sink = topicSubscribers.get(getKey(payload.getDeviceId(), payload.getMessageId()));
+        if (sink != null) {
+            sink.success(payload);
+            return true;
+        }
         return false;
     }
 
@@ -77,11 +73,11 @@ public class MessageServiceImpl implements MessageService {
         return deviceId + "/" + messageId;
     }
 
-    private RendezvousChannel subscribe(String key) {
-        RendezvousChannel result = null;
-        if (!topicSubscribers.containsKey(key))
-            topicSubscribers.put(key, result = new RendezvousChannel());
-        return result;
+    private Mono<MqttResponse> subscribe(String key) {
+        if (!topicSubscribers.containsKey(key)) {
+            return Mono.create(sink -> topicSubscribers.put(key, sink));
+        }
+        return null;
     }
 
     private void unSubscribe(String key) {
